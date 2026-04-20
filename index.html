@@ -1,117 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>MVC App</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <title>MVC_SYSTEM_INTERFACE</title>
     <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        :root { --blue: #00d4ff; --dark: #0b0e14; --card: #161b22; }
+        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        .header { border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { background: var(--card); padding: 15px; border-left: 4px solid var(--blue); }
+        
+        /* THE MODAL - CENTERED */
+        #modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--card); border: 2px solid var(--blue);
+            padding: 40px; z-index: 100; display: none; text-align: center;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
         }
-
-        .container {
-            background: #111827;
-            padding: 30px;
-            border-radius: 15px;
-            width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 8px;
-            outline: none;
-            background: #1f2937;
-            color: white;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: #22c55e;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background: #16a34a;
-        }
-
-        .users {
-            margin-top: 20px;
-        }
-
-        .user {
-            background: #1f2937;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; }
+        button { background: var(--blue); border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
-
 <body>
 
-<div class="container">
-    <h1>🚀 MVC App</h1>
+    <div class="header">
+        <h1>PROJECT_MVC // <span style="color:var(--blue)">ENGINEERING_LOG</span></h1>
+    </div>
 
-    <form id="userForm">
-        <input type="text" id="name" placeholder="Enter name" required>
-        <button type="submit">Add User</button>
-    </form>
+    <div id="task-container" class="grid">
+        </div>
 
-    <div class="users" id="userList"></div>
-</div>
+    <button onclick="showModal()" style="margin-top: 40px;">INITIALIZE NEW TASK</button>
 
-<script>
-    const form = document.getElementById('userForm');
-    const userList = document.getElementById('userList');
+    <div id="overlay" class="overlay"></div>
+    <div id="modal">
+        <h2 style="color:var(--blue)">SYSTEM_ALERT</h2>
+        <p>New Task entry initiated. Confirm deployment?</p>
+        <button onclick="closeModal()">CONFIRM</button>
+    </div>
 
-    form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    <script>
+        // Fetching from our "Controller" (The API)
+        async function loadData() {
+            const res = await fetch('/api/tasks');
+            const data = await res.json();
+            document.getElementById('task-container').innerHTML = data.map(t => `
+                <div class="card">
+                    <h3>${t.title}</h3>
+                    <small>STATUS: ${t.status}</small>
+                </div>
+            `).join('');
+        }
 
-    const name = document.getElementById('name').value;
+        function showModal() { 
+            document.getElementById('modal').style.display = 'block'; 
+            document.getElementById('overlay').style.display = 'block'; 
+        }
+        function closeModal() { 
+            document.getElementById('modal').style.display = 'none'; 
+            document.getElementById('overlay').style.display = 'none'; 
+        }
 
-    await fetch('/api', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
-    });
-
-    document.getElementById('name').value = "";
-    loadUsers();
-});
-
-async function loadUsers() {
-    const res = await fetch('/api');
-    const users = await res.json();
-
-    userList.innerHTML = "";
-    users.forEach(user => {
-        userList.innerHTML += `<div class="user">${user.name}</div>`;
-    });
-}
-    loadUsers();
-</script>
-
+        loadData();
+    </script>
 </body>
 </html>
